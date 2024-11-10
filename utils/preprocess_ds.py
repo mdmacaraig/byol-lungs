@@ -138,6 +138,36 @@ def convert_spc_metadata(root, version=2):
     assert len(df) == [64721, 105829][version - 1] # v1, v2
     print(f'Created work/metadata/spcv{version}.csv - test passed')
 
+#----------------ICBHI ---------------------------------------------------------
+def convert_icbhi_metadata(root, valid_ratio=0.1, test_ratio=0.2):
+    df = pd.read_csv(Path(root) / 'ICBHI_metadata.csv')
+    df.columns = [x.lower() for x in df.columns]
+    df = df.rename(columns={'filename': 'file_name'})
+    
+    # to shuffle data
+    df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+
+    # split to train, valid, and test sets
+    n_samples = len(df)
+    n_test = int(n_samples * test_ratio)
+    n_valid = int(n_samples * valid_ratio)
+
+    df['split'] = 'train'
+    df.loc[:n_valid, 'split'] = 'valid'
+    df.loc[n_valid:n_valid + n_test, 'split'] = 'test'
+
+    output_path = Path('work/metadata/icbhi.csv')
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(output_path, index=False)
+    
+    # validation check
+    df = pd.read_csv(output_path)
+    assert df['split'].value_counts().sum() == n_samples, "Mismatch in sample count"
+    print(f"Created {output_path} - test passed")
+
+def icbhi(root):
+    convert_icbhi_metadata(root)
+    convert_wav(root, 'work/16k/icbhi', verbose=False)
 
 def spcv1(root):
     convert_spc_metadata(root, version=1)

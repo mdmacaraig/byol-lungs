@@ -24,8 +24,16 @@ def _converter_worker(args):
     if verbose:
         print(from_dir, '->', to_name)
 
-    # load wav
-    wav, org_sr = torchaudio.load(from_dir/subpathname)
+    # replace 'subpathname' with 'from_dir / subpathname' if downstream task is not icbhi!
+    print(f'Attempting to load file: {subpathname}')
+
+    # Load wav
+    try:
+        wav, org_sr = torchaudio.load(subpathname)
+    except Exception as e:
+        print(f"Error loading {subpathname}: {e}")
+        return None
+
 
     # stereo to mono (compatible with librosa)
     # ref: https://librosa.org/doc/main/generated/librosa.to_mono.html#librosa.to_mono
@@ -39,6 +47,7 @@ def _converter_worker(args):
 
     # save wav
     to_name.parent.mkdir(exist_ok=True, parents=True)
+    print(subpathname, ' finished')
     torchaudio.save(to_name, wav, sample_rate)
 
     return to_name.name
@@ -53,7 +62,7 @@ def convert_wav(from_dir, to_dir, config_path='config.yaml', verbose=True) -> No
 
     with Pool() as p:
         args = [[f, from_dir, to_dir, cfg.sample_rate, verbose] for f in files]
-        shapes = list(tqdm(p.imap(_converter_worker, args), total=len(args)))
+        list(tqdm(p.imap(_converter_worker, args), total=len(args)))
 
     print('finished.')
 

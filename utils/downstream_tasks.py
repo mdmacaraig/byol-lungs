@@ -82,6 +82,16 @@ def get_fsdnoisy18k(base_folder):
     assert np.all(np.array([len(idx) for idx in idxs]) > 0)
     return df, idxs, False
 
+def get_icbhi(base_folder):
+    df = read_task_df('icbhi', base_folder)
+    
+    # Make split indexes for train, valid, test
+    idxs = [None, None, None]
+    idxs[0] = df[df.split == 'train'].index.values
+    idxs[1] = df[df.split == 'valid'].index.values
+    idxs[2] = df[df.split == 'test'].index.values
+    assert np.all(np.array([len(idx) for idx in idxs]) > 0)
+    return df, idxs, False
 
 def load_metadata(mode, base):
     getter = eval('get_' + mode)
@@ -171,5 +181,5 @@ class TaskDataSource(BaseDataSource):
 def create_data_source(mode):
     """Creates data source object for downstream task you want."""
 
-    assert mode in ['us8k', 'spcv1', 'spcv2', 'nsynth', 'fsdnoisy18k']
+    assert mode in ['us8k', 'spcv1', 'spcv2', 'nsynth', 'fsdnoisy18k', 'icbhi']
     return TaskDataSource(mode)

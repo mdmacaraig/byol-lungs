@@ -20,7 +20,7 @@ class NetworkCommonMixIn():
     def load_weight(self, weight_file, device, state_dict=None, key_check=True):
         """Utility to load a weight file to a device."""
 
-        state_dict = state_dict or torch.load(weight_file, map_location=device)
+        state_dict = state_dict or torch.load(weight_file, map_location=torch.device('cpu'))
         if 'state_dict' in state_dict:
             state_dict = state_dict['state_dict']
         # Remove unneeded prefixes from the keys of parameters.
@@ -198,7 +198,7 @@ class AudioNTT2020Task6X(nn.Module, NetworkCommonMixIn):
             'fc.0': 'fc1.0',
             'fc.3': 'fc2.1',
         }
-        state_dict = torch.load(weight_file, map_location=device)
+        state_dict = torch.load(weight_file, map_location=torch.device('cpu'))
         new_dict = {}
         # replace keys and remove 'num_batches_tracked'
         for key in state_dict:

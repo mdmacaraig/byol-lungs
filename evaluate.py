@@ -40,7 +40,7 @@ from byol_a.models import AudioNTT2020
 
 
 logging.basicConfig(level=logging.DEBUG)
-device = torch.device('cuda')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def calc_norm_stats(cfg, data_src, n_stats=10000):
@@ -193,7 +193,7 @@ def prepare_linear_evaluation(weight_file, ds_task, unit_sec, n_stats=10000):
         folds: Folds that hold X, y for all folds.
         loocv: True if the task is 10-folds LOO-CV, or False if it is a single fold (train/valid/test).
     """
-
+    
     cfg = load_yaml_config('config.yaml')
     cfg.unit_sec = unit_sec
     cfg.feature_d = get_model_feature_d(weight_file)
