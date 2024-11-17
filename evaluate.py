@@ -35,7 +35,7 @@ from utils.downstream_tasks import create_data_source
 from utils import append_to_csv
 from byol_a.common import seed_everything, load_yaml_config
 from byol_a.augmentations import PrecomputedNorm
-from byol_a.dataset import WaveInLMSOutDataset
+from byol_a.dataset import WaveInLMSOutDataset, WaveInOutDataset
 from byol_a.models import AudioNTT2020
 
 
@@ -63,7 +63,7 @@ def calc_norm_stats(cfg, data_src, n_stats=10000):
     n_stats = min(n_stats, len(stats_data))
     logging.info(f'Calculating mean/std using random {n_stats} samples from training population {len(stats_data)} samples...')
     sample_idxes = np.random.choice(range(len(stats_data)), size=n_stats, replace=False)
-    ds = WaveInLMSOutDataset(cfg, stats_data.files, labels=None, tfms=None)
+    ds = WaveInOutDataset(cfg, stats_data.files, labels=None, tfms=None)
     X = [ds[i] for i in tqdm(sample_idxes)]
     X = np.hstack(X)
     norm_stats = np.array([X.mean(), X.std()])
@@ -93,7 +93,7 @@ def get_embeddings(cfg, files, model, norm_stats):
         norm_stats: Mean & standard deviation calcurlated by calc_norm_stats().
     """
 
-    ds = WaveInLMSOutDataset(cfg, files, labels=None, tfms=PrecomputedNorm(norm_stats))
+    ds = WaveInOutDataset(cfg, files, labels=None, tfms=PrecomputedNorm(norm_stats))
     dl = torch.utils.data.DataLoader(ds, batch_size=cfg.bs, num_workers=cfg.num_workers,
                                      pin_memory=False, shuffle=False, drop_last=False)
     embs = []

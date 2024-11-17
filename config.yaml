@@ -1,6 +1,7 @@
 # Unit duration in seconds for one audio segment.
 unit_sec: 0.95
 # FFT parameters.
+to_scalogram: true
 sample_rate: 16000
 n_fft: 1024
 win_length: 1024
